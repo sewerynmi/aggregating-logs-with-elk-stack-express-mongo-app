@@ -33,4 +33,4 @@ Aggregating all logs from Express app and Mongo DB with Kibana
 
 `http://localhost:3000/user/:userId`
 
-- `:userId` is user \_id from mongo
+- GET with `:userId` - user \_id from mongodb
