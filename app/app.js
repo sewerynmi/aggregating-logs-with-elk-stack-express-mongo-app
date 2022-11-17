@@ -32,16 +32,19 @@ app.get("/user", async (req, res) => {
 });
 
 app.get("/user/:userId", async (req, res) => {
+  console.log("Attempt to find user with id: " + req.params.userId);
+
   try {
-    const foundUser = await User.findById(
-      req.params.userId,
-      (err, result) => {}
-    );
+    const foundUser = await User.findById(req.params.userId);
 
     if (foundUser) {
       console.log(
         JSON.stringify({
-          message: "Searching for a user with id: " + req.params.userId,
+          message:
+            "Searching for a user with id: " +
+            req.params.userId +
+            ", user name: " +
+            foundUser.fname,
           status: "success",
         })
       );
@@ -55,8 +58,8 @@ app.get("/user/:userId", async (req, res) => {
         error: err,
       })
     );
-    return res.status(409).send({ message: "User not found" });
   }
+  return res.status(409).send({ message: "User not found" });
 });
 
 app.post("/user", async (req, res) => {
