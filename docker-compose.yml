@@ -1,0 +1,78 @@
+version: "3"
+
+services:
+  express-app:
+    build:
+      context: ./app
+    volumes:
+      - ./app:/usr/app
+    container_name: node_app
+    ports:
+      - "3000:3000"
+    logging:
+      driver: gelf
+      options:
+        gelf-address: "udp://127.0.0.1:12201"
+        tag: "express-app"
+    command: npm start
+    depends_on:
+      - mongo
+    networks:
+      - mongoapp
+
+  mongo:
+    container_name: mongo
+    image: mongo:latest
+    ports:
+      - 27017:27017
+    volumes:
+      - mongodb_data_container:/data/db
+    logging:
+      driver: gelf
+      options:
+        gelf-address: "udp://127.0.0.1:12201"
+        tag: "mongo"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: rootpassword
+      MONGO_INITDB_DATABASE: usersdb
+    restart: always
+    networks:
+      - mongoapp
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.6.2
+    environment:
+      - discovery.type=single-node
+    ports:
+      - 9200:9200
+    mem_limit: 1g
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.6.2
+    ports:
+      - 5601:5601
+    depends_on:
+      - elasticsearch
+      - logstash
+    mem_limit: 1g
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:7.6.2
+    links:
+      - elasticsearch
+    volumes:
+      - .:/etc/logstash
+    command: logstash -f /etc/logstash/logstash.conf
+    ports:
+      - 12201:12201/udp
+    depends_on:
+      - elasticsearch
+    mem_limit: 1g
+
+volumes:
+  mongodb_data_container:
+
+networks:
+  mongoapp:
+    driver: bridge
