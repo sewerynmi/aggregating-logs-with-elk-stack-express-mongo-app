@@ -1,4 +1,4 @@
-# Logging Express+MonggoDB API logs with ELK stack
+# Aggregating Express + MonggoDB app logs with ELK stack
 
 Aggregating all logs from Express app and Mongo DB with Kibana
 
